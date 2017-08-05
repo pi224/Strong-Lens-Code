@@ -1,8 +1,11 @@
-from keras.models import Sequential
+
+m keras.models import Sequential
 from keras.layers import Flatten, Dense
 from keras.layers.normalization import BatchNormalization
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.optimizers import Adam
+
+from spatial_transformer import SpatialTransformer
 
 from sklearn import metrics
 
@@ -65,7 +68,24 @@ def simpConvNNBatchFirst(input_shape=(64, 64, 3)):
 	model.add(Dense(1, activation='sigmoid'))
 	return model
 
+
+def standardCompiledSimpConvNNSTN():
+    """
+    Compile the classifier simpConvNNSTN
+    """
+	model = simpConvNNSTN()
+	optimizer = Adam(lr = .000005, decay = 5e-5)
+	model.compile(optimizer=optimizer,
+	loss='binary_crossentropy',
+	metrics=['accuracy'])
+
+	return model
+
+    
 def simpConvNNSTN(input_shape=(64,64,3)):
+    """
+    Build the classifier simpConvNNSTN
+    """
     model = Sequential()
     model.add(SpatialTransformer(localization_net=locnet,
                              downsample_factor=3, input_shape=input_shape))
