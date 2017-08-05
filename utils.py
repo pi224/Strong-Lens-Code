@@ -1,5 +1,4 @@
 import numpy
-from sklearn import metrics
 
 def pairwise(iterable):
     "s -> (s0, s1), (s2, s3), (s4, s5), ..."
@@ -25,7 +24,7 @@ def train(compiled_model, epochs, trainX_file, trainY_file):
 	return compiled_model
 
 
-def test(trained_model, *argv):
+def test(trained_model, metrics_array, *argv):
 	testing_sets = [(0, 0)]
 
 	try:
@@ -49,8 +48,13 @@ def test(trained_model, *argv):
 			Y_file = 'testing Y ' + str(counter)
 		y_pred = trained_model.predict_classes(X)
 		y_prob = trained_model.predict(X)
-		print ('\n'+X_file+' AUROC:', metrics.roc_auc_score(Y, y_prob))
-		print ('\n'+X_file+' precision:', metrics.precision_score(Y, y_pred, average = 'binary'))
-		print ('\n'+X_file+' recall:', metrics.recall_score(Y, y_pred, average = 'binary'))
-		print ('\n'+X_file+' train accuracy:', metrics.accuracy_score(Y, y_pred))
+		
+		if type(metrics_array) is not list:
+			metrics_array = [metrics_array]
+
+		for metric in metrics_array:
+			metric(X_file, X, Y, y_pred, y_prob)
+			print('\n------------------------------------------\n')
+
 		del X, Y
+		print('\n==============================================\n')

@@ -6,7 +6,7 @@ from keras.optimizers import Adam
 
 from sklearn import metrics
 
-
+#adam optimizer with learning rate .0001 and decay 5e-5
 def standardCompiledSimpConvNN():
 	model = simpConvNN()
 	optimizer = Adam(lr = .0001, decay = 5e-5)
@@ -36,6 +36,7 @@ def simpConvNN(input_shape=(64, 64, 3)):
 	model.add(Dense(1, activation='sigmoid'))
 	return model
 
+#adam optimizer with learning rate .000005 and decay 5e-5
 def standardCompiledSimpConvNNBatchFirst():
 	model = simpConvNN()
 	optimizer = Adam(lr = .000005, decay = 5e-5)
