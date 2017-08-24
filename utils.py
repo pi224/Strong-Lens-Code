@@ -58,3 +58,11 @@ def test(trained_model, metrics_array, *argv):
 
 		del X, Y
 		print('\n==============================================\n')
+
+def bootstrap(datum, num_samples):
+	if type(datum) is str:
+		datum = numpy.load(datum)
+
+	selection = numpy.random.choice(datum.shape[0], num_samples, replace=True)
+	sample = datum[selection]
+	return sample
