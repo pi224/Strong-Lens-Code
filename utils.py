@@ -2,9 +2,9 @@ import numpy
 from sklearn.model_selection import KFold
 
 def pairwise(iterable):
-    "s -> (s0, s1), (s2, s3), (s4, s5), ..."
-    a = iter(iterable)
-    return zip(a, a)
+	"s -> (s0, s1), (s2, s3), (s4, s5), ..."
+	a = iter(iterable)
+	return zip(a, a)
 
 def train(compiled_model, epochs, trainX_file, trainY_file,
 				validX_file = None, validY_file = None, print_summary=True):
@@ -28,23 +28,23 @@ def train(compiled_model, epochs, trainX_file, trainY_file,
 		trainY = trainY_file
 	try:
 
-        datagen  = keras.preprocessing.image.ImageDataGenerator(
-                                             zca_whitening=True,
-                                             zca_epsilon=1e-2,
-                                             featurewise_center=True,
-                                             featurewise_std_normalization=True,
-                                             rotation_range=20,
-                                             width_shift_range=0.2,
-                                             height_shift_range=0.2,
-                                             horizontal_flip=True)
-        datagen.fit(trainX)
-        
-        compiled_model.fit_generator(datagen.flow(trainX, trainY, batch_size=32),
-                    steps_per_epoch=len(trainX) / 32, epochs = epochs)
-    
-    except:
-	
-        return compiled_model
+		datagen  = keras.preprocessing.image.ImageDataGenerator(
+							zca_whitening=True,
+							zca_epsilon=1e-2,
+							featurewise_center=True,
+						featurewise_std_normalization=True,
+						rotation_range=20,
+						width_shift_range=0.2,
+						height_shift_range=0.2,
+						horizontal_flip=True
+						)
+		datagen.fit(trainX)
+
+		compiled_model.fit_generator(datagen.flow(trainX, trainY, batch_size=32),
+			steps_per_epoch=len(trainX) / 32, epochs = epochs)
+	except:
+
+		return compiled_model
 
 		if validX is None:
 			model.fit(trainX, trainY, epochs=epochs)
@@ -80,20 +80,18 @@ def test(trained_model, metrics_array, *argv):
 			X_file = 'testing X ' + str(counter)
 			Y_file = 'testing Y ' + str(counter)
 
-        datagen  = keras.preprocessing.image.ImageDataGenerator(
-                                             zca_whitening=True,
-                                             zca_epsilon=1e-2,
-                                             featurewise_center=True,
-                                             featurewise_std_normalization=True,
-                                             rotation_range=20,
-                                             width_shift_range=0.2,
-                                             height_shift_range=0.2,
-                                             horizontal_flip=True)
-        datagen.fit(X)
-                    
-		y_pred = trained_model.predict_classes(X)
-		y_prob = trained_model.predict(X)
-		
+	datagen  = keras.preprocessing.image.ImageDataGenerator(
+					zca_whitening=True,
+					zca_epsilon=1e-2,
+					featurewise_center=True,
+					featurewise_std_normalization=True,
+					rotation_range=20,
+					width_shift_range=0.2,
+					height_shift_range=0.2,
+					horizontal_flip=True)
+	datagen.fit(X)
+	y_pred = trained_model.predict_classes(X)
+	y_prob = trained_model.predict(X)
 		if type(metrics_array) is not list:
 			metrics_array = [metrics_array]
 
