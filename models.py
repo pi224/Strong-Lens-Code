@@ -122,3 +122,4 @@ def simpConvNNSTN(input_shape=(64,64,3)):
 	model.add(Dense(32, activation='softplus'))
 	model.add(Dense(1, activation='sigmoid'))
 	return model
+
