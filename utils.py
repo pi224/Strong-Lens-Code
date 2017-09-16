@@ -19,32 +19,22 @@ def pairwise(iterable):
     a = iter(iterable)
     return zip(a, a)
 
-def train(compiled_model, epochs, trainX_file, trainY_file,
-				validX_file = None, validY_file = None, print_summary=False):
+def train(compiled_model, epochs, steps_per_epoch=None, generator,
+				valid_generator=None, print_summary=False):
 	model = compiled_model
 	if print_summary:
 		print(model.summary())
-	validX = None
-	validY = None
-	if type(validX_file) is str:
-		validX = numpy.load(validX_file)
-		validY = numpy.load(validY_file)
-	else:
-		trainX = trainX_file
-		trainY = trainY_file
-
-	if type(trainX_file) is str:
-		trainX = numpy.load(trainX_file)
-		trainY = numpy.load(trainY_file)
-	else:
-		trainX = trainX_file
-		trainY = trainY_file
+	if steps_per_epoch is None:
+		steps_per_epoch = len(generator) // 32
+	
 	try:
-		if validX is None:
-			model.fit(trainX, trainY, epochs=epochs)
+		if valid_generator is None:
+			model.fit_generator(generator, steps_per_epoch=steps_per_epoch,
+								epochs=epochs)
 		else:
-			model.fit(trainX, trainY, epochs=epochs,
-						validation_data=(validX, validY))
+			model.fit_generator(generator, steps_per_epoch=steps_per_epoch,
+						epochs=epochs, validation_data=valid_generator,
+						validation_steps=steps_per_epoch)
 	except KeyboardInterrupt:
 		print('KeyboardInterrupt - returning current model')
 		return model
@@ -56,7 +46,7 @@ def test(trained_model, metrics_array, *argv):
 	testing_sets = [(0, 0)]
 
 	try:
-		testing_sets = pairwise(argv)
+		generators = argv
 	except:
 		print('an error occurred with your testing sets. Are you missing \
 			some input vectors or some labels? Or maybe you paired the name \
