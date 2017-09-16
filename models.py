@@ -1,4 +1,5 @@
 from keras.models import Sequential
+from keras.layers import Flatten, Dense
 from keras.layers import Flatten, Dense, Activation
 from keras.layers.normalization import BatchNormalization
 from keras.layers.convolutional import Conv2D, MaxPooling2D
@@ -69,9 +70,9 @@ def simpConvNNBatchFirst(input_shape=(64, 64, 3)):
 
 
 def standardCompiledSimpConvNNSTN():
-	"""
-	Compile the classifier simpConvNNSTN
-	"""
+    """
+    Compile the classifier simpConvNNSTN
+    """
 	model = simpConvNNSTN()
 	optimizer = Adam(lr = .000005, decay = 5e-5)
 	model.compile(optimizer=optimizer,
@@ -80,7 +81,6 @@ def standardCompiledSimpConvNNSTN():
 
 	return model
 
-	
 def simpConvNNSTN(input_shape=(64,64,3)):
 	"""
 	Build the classifier simpConvNNSTN
@@ -122,4 +122,3 @@ def simpConvNNSTN(input_shape=(64,64,3)):
 	model.add(Dense(32, activation='softplus'))
 	model.add(Dense(1, activation='sigmoid'))
 	return model
-

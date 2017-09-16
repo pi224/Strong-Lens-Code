@@ -41,17 +41,18 @@ def train(compiled_model, epochs, trainX_file, trainY_file,
 						)
 		datagen.fit(trainX)
 
-		compiled_model.fit_generator(datagen.flow(trainX, trainY, batch_size=32),
+		model.fit_generator(datagen.flow(trainX, trainY, batch_size=32),
 			steps_per_epoch=len(trainX) / 32, epochs = epochs)
 	except:
 
-		return compiled_model
+		return model
 
 		if validX is None:
 			model.fit(trainX, trainY, epochs=epochs)
 		else:
 			model.fit(trainX, trainY, epochs=epochs,
 						validation_data=(validX, validY))
+	
 	except KeyboardInterrupt:
 		print('KeyboardInterrupt - returning current model')
 		return model
