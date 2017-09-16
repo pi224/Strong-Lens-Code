@@ -1,6 +1,6 @@
-
-m keras.models import Sequential
+from keras.models import Sequential
 from keras.layers import Flatten, Dense
+from keras.layers import Flatten, Dense, Activation
 from keras.layers.normalization import BatchNormalization
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.optimizers import Adam
@@ -8,7 +8,7 @@ from keras.optimizers import Adam
 from spatial_transformer import SpatialTransformer
 
 from sklearn import metrics
-
+import numpy as np
 
 def standardCompiledSimpConvNN():
 	model = simpConvNN()
@@ -81,15 +81,32 @@ def standardCompiledSimpConvNNSTN():
 
 	return model
 
-    
 def simpConvNNSTN(input_shape=(64,64,3)):
-    """
-    Build the classifier simpConvNNSTN
-    """
-    model = Sequential()
-    model.add(SpatialTransformer(localization_net=locnet,
-                             downsample_factor=3, input_shape=input_shape))
-    model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2), input_shape=input_shape))
+	"""
+	Build the classifier simpConvNNSTN
+	"""
+	# initial weights
+	b = np.zeros((2, 3), dtype='float32')
+	b[0, 0] = 1
+	b[1, 1] = 1
+	W = np.zeros((50, 6), dtype='float32')
+	weights = [W, b.flatten()]
+	
+	locnet = Sequential()
+	locnet.add(MaxPooling2D(pool_size=(2,2), input_shape=input_shape))
+	locnet.add(Conv2D(20, (5, 5)))
+	locnet.add(MaxPooling2D(pool_size=(2,2)))
+	locnet.add(Conv2D(20, (5, 5)))
+
+	locnet.add(Flatten())
+	locnet.add(Dense(50))
+	locnet.add(Activation('relu'))
+	locnet.add(Dense(6, weights=weights))
+	
+	model = Sequential()
+	model.add(SpatialTransformer(localization_net=locnet,
+		output_size=(64,64,3), input_shape=input_shape))
+	model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2), input_shape=input_shape))
 	#model went from 64x64x3 to 32x32x3
 	model.add(Conv2D(64, (3, 3), strides=(2,2), activation='softplus'))
 	#model is now 16x16x64
