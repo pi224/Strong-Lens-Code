@@ -1,5 +1,7 @@
 import numpy
-from sklearn.model_selection import KFold
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+from sklearn.model_selection import KFold, train_test_split
 
 def pairwise(iterable):
     "s -> (s0, s1), (s2, s3), (s4, s5), ..."
@@ -13,11 +15,6 @@ def bootstrap(datum, num_samples):
 	selection = numpy.random.choice(datum.shape[0], num_samples, replace=True)
 	sample = datum[selection]
 	return sample
-=======
-import numpy
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-from sklearn.model_selection import KFold, train_test_split
 
 def bootstrap(datum, num_samples, random_seed = None):
 	if random_seed is not None:
