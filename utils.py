@@ -51,7 +51,7 @@ def train(compiled_model, epochs, trainX_file, trainY_file,
 
 	return model
 
-
+#deprecated, don't use!
 def test(trained_model, metrics_array, *argv):
 	testing_sets = [(0, 0)]
 
