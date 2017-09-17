@@ -23,3 +23,7 @@ def aurocGraph(name, testX, testY, yPred, yProb):
 
 def auroc(testX, testY, yPred, yProb):
 	return metrics.roc_auc_score(testY, yProb)
+
+def accuracy(testX, testY, yPred, yProb):
+	return sum([1 if x is y else 0
+					for x, y in zip(testY, yPred)])/len(yPred)

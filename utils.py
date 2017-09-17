@@ -87,8 +87,8 @@ def test(trained_model, metrics_array, *argv):
 		del X, Y
 		print('\n==============================================\n')
 
-def cross_validation(model_function, metrics_array,
-			validX, validY, numFolds, num_epochs, print_summary = False):
+def cross_validation(model_function, validX, validY, numFolds, num_epochs, 
+					metrics_array, print_summary = False):
 	#load the data first
 	if type(validX) is str:
 		validX = numpy.load(validX)
@@ -123,7 +123,7 @@ def cross_validation(model_function, metrics_array,
 
 		counter += 1
 
-#TODO: DEBUG!!!!
+
 def learning_curve(model_function, data, labels, fraction_test,
 							num_iterations, num_epochs, evaluation_functions):
 	if evaluation_functions is not list:
