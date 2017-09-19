@@ -1,5 +1,9 @@
 # Strong-Lens-Code
-This is a temporary home for code from the strong lenses project at MDST  
+This is a temporary home for code from the strong lenses project at MDST.
+
+The data may be downloaded from the MBox folder dedicated to this project, per MDST policy. Everyone should be able to access that, as long as they login using their UMich IDs. Currently (17 September 2017) we are working with *imadjust.npy* with *classification.npy* as the labels.
+
+
 Below follows two sections:
 * Code structure
 * basic use cases/examples
