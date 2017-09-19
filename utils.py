@@ -203,3 +203,57 @@ def epoch_curve(model_function, data, labels, validation_fraction,
 	for test_result in test_results:
 		plt.plot(epochs, test_result, color='blue')
 		plt.show()
+
+fast_accuracy = lambda pred, label: sum([1 if p == l else 0
+					for p, l in zip(pred, label)]) / len(label)
+def probabilistic_to_binary(probabilities, labels):
+	if len(probabilities[0].shape) > 1:
+		probabilities = numpy.asarray([p[0] for p in probabilities])
+
+	binary = numpy.asarray([0 if p <0.5 else 1 for p in probabilities])
+	flipped = numpy.asarray([1 if b is 0 else 0 for b in binary])
+	if fast_accuracy(binary, labels) >= fast_accuracy(flipped, labels):
+		return binary
+	return flipped
+
+
+def cross_validation_generator(model_function, validX, validY,
+		generator, numFolds, num_epochs, batch_size,
+		metrics_array, print_summary = False):
+	#load the data first
+	if type(validX) is str:
+		validX = numpy.load(validX)
+		validY = numpy.load(validY)
+
+	#partition into folds
+	kf = KFold(n_splits=numFolds)
+
+	counter = 0
+	for train_index, test_index in kf.split(validX):
+		print('Fold ', counter, '\n========================================\n')
+
+		trainX, trainY = validX[train_index], validY[train_index]
+		testX, testY = validX[test_index], validY[test_index]
+
+		#train the model, and print out summary if on the first epoch
+		print_summary = False
+		if counter is 0 and print_summary:
+			print_summary = True
+
+		trained_model = model_function()
+		generator.fit(trainX)
+		trained_model.fit_generator(generator.flow(trainX, trainY),
+					len(trainX)//batch_size, epochs=num_epochs)
+
+		y_prob = trained_model.predict_generator(generator.flow(testX, testY,),
+					len(testY)//batch_size)
+		y_pred = probabilistic_to_binary(y_prob, testY)
+
+		if type(metrics_array) is not list:
+			metrics_array = [metrics_array]
+
+		for metric in metrics_array:
+			metric('Fold '+str(counter), testX, testY, y_pred, y_prob)
+			print('------------------------------------------\n')
+
+		counter += 1
