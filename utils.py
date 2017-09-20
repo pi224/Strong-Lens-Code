@@ -42,15 +42,12 @@ def train(compiled_model, epochs, trainX_file, trainY_file,
 
 		compiled_model.fit_generator(datagen.flow(trainX, trainY, batch_size=32),
 			steps_per_epoch=len(trainX) / 32, epochs = epochs)
-	except:
-
-		return compiled_model
 
 		if validX is None:
 			model.fit(trainX, trainY, epochs=epochs)
 		else:
 			model.fit(trainX, trainY, epochs=epochs,
-						validation_data=(validX, validY))
+					validation_data=(validX, validY))
 	except KeyboardInterrupt:
 		print('KeyboardInterrupt - returning current model')
 		return model
@@ -92,15 +89,15 @@ def test(trained_model, metrics_array, *argv):
 	datagen.fit(X)
 	y_pred = trained_model.predict_classes(X)
 	y_prob = trained_model.predict(X)
-		if type(metrics_array) is not list:
-			metrics_array = [metrics_array]
+	if type(metrics_array) is not list:
+		metrics_array = [metrics_array]
 
-		for metric in metrics_array:
-			metric(X_file, X, Y, y_pred, y_prob)
-			print('\n------------------------------------------\n')
+	for metric in metrics_array:
+		metric(X_file, X, Y, y_pred, y_prob)
+		print('\n------------------------------------------\n')
 
-		del X, Y
-		print('\n==============================================\n')
+	del X, Y
+	print('\n==============================================\n')
 
 def cross_validation(model_function, metrics_array,
 			validX, validY, numFolds, num_epochs, print_summary = False):
