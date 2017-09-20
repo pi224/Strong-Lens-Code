@@ -190,6 +190,7 @@ def epoch_curve(model_function, data, labels, validation_fraction,
 	test_results = [[]] * len(evaluation_functions)
 	epochs = []
 	for i in range(1, len(epochs_to_try)):
+		print('Epoch number ', i+1)
 		y_pred = model.predict_classes(Xtest)
 		y_prob = model.predict(Xtest)
 		test_results = [r + [f(Xtest, Ytest, y_pred, y_prob)]
@@ -204,10 +205,13 @@ def epoch_curve(model_function, data, labels, validation_fraction,
 	test_results = [r + [f(Xtest, Ytest, y_pred, y_prob)]
 							for r, f in zip(test_results, evaluation_functions)]
 	epochs.append(epochs_to_try[-1])
-
+	
+	numpy.save('results_0.2_0.1.npy',test_results)
+	
 	print(test_results)
 	print(epochs)
 
 	for test_result in test_results:
 		plt.plot(epochs, test_result, color='blue')
+
 		plt.show()
