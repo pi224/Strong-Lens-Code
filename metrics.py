@@ -16,3 +16,10 @@ def aurocGraph(name, testX, testY, yPred, yProb):
 	plt.plot(tpr, fpr)
 	plt.show()
 	return
+
+
+#------------------------------------
+#below this line are only metrics, no print
+
+def auroc(testX, testY, yPred, yProb):
+	return metrics.roc_auc_score(testY, yProb)

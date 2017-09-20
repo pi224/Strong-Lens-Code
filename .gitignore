@@ -1,2 +1,6 @@
 *.pyc
 *.npy
+reg_script_*
+reg_results/*
+core*
+*.zip
