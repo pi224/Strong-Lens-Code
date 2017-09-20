@@ -86,8 +86,9 @@ def compiledRegularizedConvnet(input_shape=(101, 101, 4)):
 
 	return model
 
-reg_1 = 0.2
-reg_2 = 0.1
+reg_1 = 0.3
+reg_2 = 0.3
+reg_3 = 0.3
 def regularizedConvnet(input_shape=(101, 101, 4)):
 	model = Sequential()
 	model.add(Conv2D(64, (3, 3), strides=(2,2), activation='softplus',
@@ -100,5 +101,5 @@ def regularizedConvnet(input_shape=(101, 101, 4)):
 
 	model.add(Dense(128, activation='softplus', kernel_regularizer=l2(reg_1)))
 	model.add(Dense(32, activation='softplus', kernel_regularizer=l2(reg_2)))
-	model.add(Dense(1, activation='sigmoid'))
+	model.add(Dense(1, activation='sigmoid', kernel_regularizer=l2(reg_3)))
 	return model
