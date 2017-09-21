@@ -134,7 +134,7 @@ def cross_validation(model_function, metrics_array,
 #TODO: DEBUG!!!!
 def learning_curve(model_function, data, labels, fraction_test,
 							num_iterations, num_epochs, evaluation_functions):
-	if evaluation_functions is not list:
+	if type(evaluation_functions) is not list:
 		evaluation_functions = [evaluation_functions]
 
 	Xtrain, Xtest, Ytrain, Ytest = train_test_split(data, labels,
@@ -156,13 +156,13 @@ def learning_curve(model_function, data, labels, fraction_test,
 		y_prob = trained_model.predict(currentX)
 		train_results = [r + [f(currentX, currentY, y_pred, y_prob)]
 							for r, f in zip(train_results, evaluation_functions)]
-
+		print(train_results)
 		#evaluate on test data
 		y_pred = trained_model.predict_classes(Xtest)
 		y_prob = trained_model.predict(Xtest)
 		test_results = [r + [f(Xtest, Ytest, y_pred, y_prob)]
 							for r, f in zip(test_results, evaluation_functions)]
-		
+		print(test_results)
 		num_data_points.append(data_boundary)
 		data_boundary += iteration_size
 
