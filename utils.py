@@ -126,7 +126,7 @@ def cross_validation(model_function, validX, validY, numFolds, num_epochs,
 
 def learning_curve(model_function, data, labels, fraction_test,
 							num_iterations, num_epochs, evaluation_functions):
-	if evaluation_functions is not list:
+	if type(evaluation_functions) is not list:
 		evaluation_functions = [evaluation_functions]
 
 	Xtrain, Xtest, Ytrain, Ytest = train_test_split(data, labels,
@@ -241,10 +241,15 @@ def cross_validation_generator(model_function, validX, validY,
 			print_summary = True
 
 		trained_model = model_function()
+		
+
+		# trained_model = train(model_function(), num_epochs, currentX, currentY)
 		generator.fit(trainX)
 		trained_model.fit_generator(generator.flow(trainX, trainY),
 					len(trainX)//batch_size, epochs=num_epochs)
 
+		# y_pred = trained_model.predict_classes(currentX)
+		# y_prob = trained_model.predict(currentX)
 		y_prob = trained_model.predict_generator(generator.flow(testX, testY,),
 					len(testY)//batch_size)
 		y_pred = probabilistic_to_binary(y_prob, testY)
@@ -257,3 +262,118 @@ def cross_validation_generator(model_function, validX, validY,
 			print('------------------------------------------\n')
 
 		counter += 1
+
+
+
+def learning_curve_generator(model_function, data, labels, fraction_test,
+		generator, batch_size, num_iterations, num_epochs, evaluation_functions):
+	if type(evaluation_functions) is not list:
+		evaluation_functions = [evaluation_functions]
+
+	Xtrain, Xtest, Ytrain, Ytest = train_test_split(data, labels,
+											test_size=fraction_test)
+	Xtest = Xtest[0: (len(Ytest)//batch_size)*batch_size]
+	Ytest = Ytest[0: (len(Ytest)//batch_size)*batch_size]
+
+	iteration_size = Ytrain.shape[0] // num_iterations
+
+	data_boundary  = iteration_size
+	test_results = [[]] * len(evaluation_functions)
+	train_results = [[]] * len(evaluation_functions)
+	num_data_points = []
+	for i in range(num_iterations):
+		currentX = Xtrain[0:data_boundary]
+		currentY = Ytrain[0:data_boundary]
+		currentX = currentX[0: (len(currentY)//batch_size)*batch_size]
+		currentY = currentY[0: (len(currentY)//batch_size)*batch_size]
+		
+		# trained_model = train(model_function(), num_epochs, currentX, currentY)
+		generator.fit(currentX)
+		trained_model = model_function()
+		trained_model.fit_generator(generator.flow(currentX, currentY),
+					len(currentX)//batch_size, epochs = num_epochs)
+
+		#evaluate on train data
+		# y_pred = trained_model.predict_classes(currentX)
+		# y_prob = trained_model.predict(currentX)
+		y_prob = trained_model.predict_generator(
+				generator.flow(currentX, currentY,), len(currentY)//batch_size)
+		y_pred = probabilistic_to_binary(y_prob, currentY)
+		train_results = [r + [f(currentX, currentY, y_pred, y_prob)]
+							for r, f in zip(train_results, evaluation_functions)]
+
+		#evaluate on test data
+		# y_pred = trained_model.predict_classes(Xtest)
+		# y_prob = trained_model.predict(Xtest)
+		y_prob = trained_model.predict_generator(generator.flow(Xtest, Ytest,),
+					len(Ytest)//batch_size)
+		y_pred = probabilistic_to_binary(y_prob, Ytest)
+		test_results = [r + [f(Xtest, Ytest, y_pred, y_prob)]
+							for r, f in zip(test_results, evaluation_functions)]
+		
+		num_data_points.append(data_boundary)
+		data_boundary += iteration_size
+
+	for train_result, test_result in zip(train_results, test_results):
+		#lines
+		plt.plot(num_data_points, test_result, color='r')
+		plt.plot(num_data_points, train_result, color='g')
+		
+		#legend
+		red_patch = mpatches.Patch(color='red', label='testing performance')
+		green_patch = mpatches.Patch(color='green', label='training performance')
+		plt.legend(handles=[red_patch, green_patch])
+		
+		plt.show()
+
+
+def epoch_curve_generator(model_function, data, labels,
+		generator, batch_size, validation_fraction, epochs_to_try,
+		evaluation_functions):
+	Xtrain, Xtest, Ytrain, Ytest = train_test_split(data, labels,
+											test_size=validation_fraction)
+	Xtest = Xtest[0: (len(Ytest)//batch_size)*batch_size]
+	Ytest = Ytest[0: (len(Ytest)//batch_size)*batch_size]
+	print(len(Xtrain))
+
+
+	if type(evaluation_functions) is not list:
+		evaluation_functions = [evaluation_functions]
+
+	generator.fit(Xtrain)
+	trained_model = model_function()
+	# model = train(model_function(), epochs_to_try[0], Xtrain, Ytrain)
+	trained_model.fit_generator(generator.flow(Xtrain, Ytrain),
+				len(Xtrain)//batch_size, epochs = epochs_to_try[0])
+
+	test_results = [[]] * len(evaluation_functions)
+	epochs = []
+	for i in range(1, len(epochs_to_try)):
+		# y_pred = model.predict_classes(Xtest)
+		# y_prob = model.predict(Xtest)
+		y_prob = trained_model.predict_generator(generator.flow(Xtest, Ytest,),
+					len(Ytest)//batch_size)
+		y_pred = probabilistic_to_binary(y_prob, Ytest)
+
+		test_results = [r + [f(Xtest, Ytest, y_pred, y_prob)]
+							for r, f in zip(test_results, evaluation_functions)]
+		epochs.append(epochs_to_try[i-1])
+
+		num_epochs = epochs_to_try[i] - epochs_to_try[i-1]
+		# model = train(model, num_epochs, Xtrain, Ytrain)
+		trained_model.fit_generator(generator.flow(Xtrain, Ytrain),
+				len(Ytrain)//batch_size, epochs = num_epochs)
+
+	y_prob = trained_model.predict_generator(generator.flow(Xtest, Ytest,),
+					len(Ytest)//batch_size)
+	y_pred = probabilistic_to_binary(y_prob, Ytest)
+	test_results = [r + [f(Xtest, Ytest, y_pred, y_prob)]
+							for r, f in zip(test_results, evaluation_functions)]
+	epochs.append(epochs_to_try[-1])
+
+	print(test_results)
+	print(epochs)
+
+	for test_result in test_results:
+		plt.plot(epochs, test_result, color='blue')
+		plt.show()
