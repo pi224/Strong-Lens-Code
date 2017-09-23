@@ -206,7 +206,7 @@ def epoch_curve(model_function, data, labels, validation_fraction,
 							for r, f in zip(test_results, evaluation_functions)]
 	epochs.append(epochs_to_try[-1])
 	
-	numpy.save('results_0.3_0.3_0.3.npy',test_results)
+	numpy.save('results_0.3_0.03.npy',test_results)
 	
 	print(test_results)
 	print(epochs)
