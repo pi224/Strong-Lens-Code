@@ -87,7 +87,7 @@ def compiledRegularizedConvnet(input_shape=(101, 101, 4)):
 	return model
 
 reg_1 = 0.3
-reg_2 = 0.03
+reg_2 = 0
 reg_3 = 0
 def regularizedConvnet(input_shape=(101, 101, 4)):
 	model = Sequential()
