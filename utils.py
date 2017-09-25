@@ -30,8 +30,8 @@ def train(compiled_model, epochs, trainX_file, trainY_file,
 		validX = numpy.load(validX_file)
 		validY = numpy.load(validY_file)
 	else:
-		trainX = trainX_file
-		trainY = trainY_file
+		validX = validX_file
+		validY = validY_file
 
 	if type(trainX_file) is str:
 		trainX = numpy.load(trainX_file)
@@ -330,17 +330,19 @@ def learning_curve_generator(model_function, data, labels, fraction_test,
 def epoch_curve_generator(model_function, data, labels,
 		generator, batch_size, validation_fraction, epochs_to_try,
 		evaluation_functions):
+	#data = data[0:320]
+	#labels = labels[0:320]
 	Xtrain, Xtest, Ytrain, Ytest = train_test_split(data, labels,
 											test_size=validation_fraction)
 	Xtest = Xtest[0: (len(Ytest)//batch_size)*batch_size]
 	Ytest = Ytest[0: (len(Ytest)//batch_size)*batch_size]
 	print(len(Xtrain))
-
+	print(len(Xtest))
 
 	if type(evaluation_functions) is not list:
 		evaluation_functions = [evaluation_functions]
 
-	generator.fit(Xtrain)
+	generator.fit(Xtrain[0:320])
 	trained_model = model_function()
 	# model = train(model_function(), epochs_to_try[0], Xtrain, Ytrain)
 	trained_model.fit_generator(generator.flow(Xtrain, Ytrain),
@@ -373,6 +375,9 @@ def epoch_curve_generator(model_function, data, labels,
 
 	print(test_results)
 	print(epochs)
+	
+
+	numpy.save('results_0.3_flip_stand_centre_90.npy', epochs)
 
 	for test_result in test_results:
 		plt.plot(epochs, test_result, color='blue')
