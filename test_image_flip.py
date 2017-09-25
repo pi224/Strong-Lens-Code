@@ -22,4 +22,4 @@ generator = ImageDataGenerator(featurewise_center=True,
 	horizontal_flip=False)
 
 
-utils.epoch_curve_generator(reg_convnet, data, labels, generator, 32, 0.3, 30, auroc)
+utils.epoch_curve_generator(reg_convnet, data, labels, generator, 32, 0.3, range(1,30), auroc)
