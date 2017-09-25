@@ -5,4 +5,6 @@ reg_results/*
 core*
 *.zip
 *.pbs
-.nfs00000002fd9e52910000184e	
+.nfs00000002fd9e52910000184e
+*.e*
+*.o*	
