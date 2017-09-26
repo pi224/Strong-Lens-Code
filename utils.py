@@ -341,36 +341,41 @@ def epoch_curve_generator(model_function, data, labels,
 
 	if type(evaluation_functions) is not list:
 		evaluation_functions = [evaluation_functions]
-
+	print(Xtrain.shape)
 	generator.fit(Xtrain[0:320])
+	print("checkpoint passed: generator fit!")
 	trained_model = model_function()
 	# model = train(model_function(), epochs_to_try[0], Xtrain, Ytrain)
-	trained_model.fit_generator(generator.flow(Xtrain, Ytrain),
-				len(Xtrain)//batch_size, epochs = epochs_to_try[0])
-
+	#trained_model.fit_generator(generator.flow(Xtrain, Ytrain),
+	#			len(Xtrain)//batch_size, epochs = epochs_to_try[0])
+	
+	print("checkpoint passed: model fit for 1 epoch")
 	test_results = [[]] * len(evaluation_functions)
 	epochs = []
 	for i in range(1, len(epochs_to_try)):
 		# y_pred = model.predict_classes(Xtest)
 		# y_prob = model.predict(Xtest)
-		y_prob = trained_model.predict_generator(generator.flow(Xtest, Ytest,),
-					len(Ytest)//batch_size)
-		y_pred = probabilistic_to_binary(y_prob, Ytest)
+		#y_prob = trained_model.predict_generator(generator.flow(Xtest, Ytest,),
+		#			len(Ytest)//batch_size)
+		#y_pred = probabilistic_to_binary(y_prob, Ytest)
+		print("checkpoint passed: model prediction for 1 epoch")
 
-		test_results = [r + [f(Xtest, Ytest, y_pred, y_prob)]
-							for r, f in zip(test_results, evaluation_functions)]
+		#test_results = [r + [f(Xtest, Ytest, y_pred, y_prob)]
+		#					for r, f in zip(test_results, evaluation_functions)]
 		epochs.append(epochs_to_try[i-1])
 
 		num_epochs = epochs_to_try[i] - epochs_to_try[i-1]
 		# model = train(model, num_epochs, Xtrain, Ytrain)
-		trained_model.fit_generator(generator.flow(Xtrain, Ytrain),
-				len(Ytrain)//batch_size, epochs = num_epochs)
+		#trained_model.fit_generator(generator.flow(Xtrain, Ytrain),
+		#		len(Ytrain)//batch_size, epochs = num_epochs)
+		print("checkpoint passed: fit pre-trained model")
 
-	y_prob = trained_model.predict_generator(generator.flow(Xtest, Ytest,),
-					len(Ytest)//batch_size)
-	y_pred = probabilistic_to_binary(y_prob, Ytest)
-	test_results = [r + [f(Xtest, Ytest, y_pred, y_prob)]
-							for r, f in zip(test_results, evaluation_functions)]
+	#y_prob = trained_model.predict_generator(generator.flow(Xtest, Ytest,),
+	#				len(Ytest)//batch_size)
+	#y_pred = probabilistic_to_binary(y_prob, Ytest)
+	print("final checkpoint passed")
+	#test_results = [r + [f(Xtest, Ytest, y_pred, y_prob)]
+	#						for r, f in zip(test_results, evaluation_functions)]
 	epochs.append(epochs_to_try[-1])
 
 	print(test_results)
