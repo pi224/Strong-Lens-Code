@@ -93,10 +93,9 @@ def cross_validation(model_function, validX, validY, numFolds, num_epochs,
 	if type(validX) is str:
 		validX = numpy.load(validX)
 		validY = numpy.load(validY)
-
 	#partition into folds
 	kf = KFold(n_splits=numFolds)
-
+	data_shape = trainX.shape
 	counter = 0
 	for train_index, test_index in kf.split(validX):
 		print('Fold ', counter, '\n========================================\n')
@@ -108,7 +107,9 @@ def cross_validation(model_function, validX, validY, numFolds, num_epochs,
 		print_summary = False
 		if counter is 0 and print_summary:
 			print_summary = True
-		trained_model = train(model_function(), num_epochs,
+
+		
+	trained_model = train(model_function(input_shape = data_shape[1:]), num_epochs,
 					trainX, trainY, testX, testY, print_summary)
 
 		y_pred = trained_model.predict_classes(testX)
@@ -133,7 +134,7 @@ def learning_curve(model_function, data, labels, fraction_test,
 											test_size=fraction_test)
 
 	iteration_size = Ytrain.shape[0] // num_iterations
-
+	data_shape = data.shape
 	data_boundary  = iteration_size
 	test_results = [[]] * len(evaluation_functions)
 	train_results = [[]] * len(evaluation_functions)
@@ -141,7 +142,8 @@ def learning_curve(model_function, data, labels, fraction_test,
 	for i in range(num_iterations):
 		currentX = Xtrain[0:data_boundary]
 		currentY = Ytrain[0:data_boundary]
-		trained_model = train(model_function(), num_epochs, currentX, currentY)
+		
+	trained_model = train(model_function(input_shape = data_shape[1:]), num_epochs, currentX, currentY)
 
 		#evaluate on train data
 		y_pred = trained_model.predict_classes(currentX)
@@ -177,7 +179,8 @@ def epoch_curve(model_function, data, labels, validation_fraction,
 	if type(evaluation_functions) is not list:
 		evaluation_functions = [evaluation_functions]
 
-	model = train(model_function(), epochs_to_try[0], Xtrain, Ytrain)
+	data_shape = data.shape
+	model = train(model_function(input_shape = data.shape[1:]), epochs_to_try[0], Xtrain, Ytrain)
 
 	test_results = [[]] * len(evaluation_functions)
 	epochs = []
@@ -227,7 +230,7 @@ def cross_validation_generator(model_function, validX, validY,
 
 	#partition into folds
 	kf = KFold(n_splits=numFolds)
-
+	data_shape = validX.shape
 	counter = 0
 	for train_index, test_index in kf.split(validX):
 		print('Fold ', counter, '\n========================================\n')
@@ -240,7 +243,7 @@ def cross_validation_generator(model_function, validX, validY,
 		if counter is 0 and print_summary:
 			print_summary = True
 
-		trained_model = model_function()
+		trained_model = model_function(input_shape = data.shape[1:])
 		
 
 		# trained_model = train(model_function(), num_epochs, currentX, currentY)
@@ -276,7 +279,7 @@ def learning_curve_generator(model_function, data, labels, fraction_test,
 	Ytest = Ytest[0: (len(Ytest)//batch_size)*batch_size]
 
 	iteration_size = Ytrain.shape[0] // num_iterations
-
+	data_shape = data.shape
 	data_boundary  = iteration_size
 	test_results = [[]] * len(evaluation_functions)
 	train_results = [[]] * len(evaluation_functions)
@@ -289,7 +292,7 @@ def learning_curve_generator(model_function, data, labels, fraction_test,
 		
 		# trained_model = train(model_function(), num_epochs, currentX, currentY)
 		generator.fit(currentX)
-		trained_model = model_function()
+		trained_model = model_function(input_shape = data.shape[1:])
 		trained_model.fit_generator(generator.flow(currentX, currentY),
 					len(currentX)//batch_size, epochs = num_epochs)
 
@@ -339,12 +342,14 @@ def epoch_curve_generator(model_function, data, labels,
 	print(len(Xtrain))
 	print(len(Xtest))
 
+	data_shape = data.shape
+
 	if type(evaluation_functions) is not list:
 		evaluation_functions = [evaluation_functions]
 	print(Xtrain.shape)
 	generator.fit(Xtrain[0:320])
 	print("checkpoint passed: generator fit!")
-	trained_model = model_function()
+	trained_model = model_function(input_shape = data.shape[1:])
 	# model = train(model_function(), epochs_to_try[0], Xtrain, Ytrain)
 	#trained_model.fit_generator(generator.flow(Xtrain, Ytrain),
 	#			len(Xtrain)//batch_size, epochs = epochs_to_try[0])
