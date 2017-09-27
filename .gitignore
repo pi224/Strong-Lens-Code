@@ -7,4 +7,6 @@ core*
 *.pbs
 .nfs00000002fd9e52910000184e
 *.e*
-*.o*	
+*.o*
+
+test_image_flip_*	
