@@ -109,7 +109,7 @@ def cross_validation(model_function, validX, validY, numFolds, num_epochs,
 			print_summary = True
 
 		
-	trained_model = train(model_function(input_shape = data_shape[1:]), num_epochs,
+		trained_model = train(model_function(input_shape = data_shape[1:]), num_epochs,
 					trainX, trainY, testX, testY, print_summary)
 
 		y_pred = trained_model.predict_classes(testX)
@@ -143,7 +143,7 @@ def learning_curve(model_function, data, labels, fraction_test,
 		currentX = Xtrain[0:data_boundary]
 		currentY = Ytrain[0:data_boundary]
 		
-	trained_model = train(model_function(input_shape = data_shape[1:]), num_epochs, currentX, currentY)
+		trained_model = train(model_function(input_shape = data_shape[1:]), num_epochs, currentX, currentY)
 
 		#evaluate on train data
 		y_pred = trained_model.predict_classes(currentX)
