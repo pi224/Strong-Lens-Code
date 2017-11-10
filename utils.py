@@ -2,6 +2,7 @@ import numpy
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from sklearn.model_selection import KFold, train_test_split
+from metrics import aurocGraph, confusionMatrix
 
 def bootstrap(datum, num_samples, random_seed = None):
 	if random_seed is not None:
@@ -204,6 +205,7 @@ def epoch_curve(model_function, data, labels, validation_fraction,
 		plt.plot(epochs, test_result, color='blue')
 		plt.show()
 
+
 fast_accuracy = lambda pred, label: sum([1 if p == l else 0
 					for p, l in zip(pred, label)]) / len(label)
 def probabilistic_to_binary(probabilities, labels):
@@ -344,7 +346,8 @@ def epoch_curve_generator(model_function, data, labels,
 	trained_model = model_function()
 	# model = train(model_function(), epochs_to_try[0], Xtrain, Ytrain)
 	trained_model.fit_generator(generator.flow(Xtrain, Ytrain),
-				len(Xtrain)//batch_size, epochs = epochs_to_try[0])
+				len(Xtrain)//batch_size, epochs = epochs_to_try[0],
+				max_queue_size = 2)
 
 	test_results = [[]] * len(evaluation_functions)
 	epochs = []
@@ -361,8 +364,10 @@ def epoch_curve_generator(model_function, data, labels,
 
 		num_epochs = epochs_to_try[i] - epochs_to_try[i-1]
 		# model = train(model, num_epochs, Xtrain, Ytrain)
+		del y_prob, y_pred
 		trained_model.fit_generator(generator.flow(Xtrain, Ytrain),
-				len(Ytrain)//batch_size, epochs = num_epochs)
+				len(Ytrain)//batch_size, epochs = num_epochs,
+				max_queue_size = 2)
 
 	y_prob = trained_model.predict_generator(generator.flow(Xtest, Ytest,),
 					len(Ytest)//batch_size)
@@ -370,6 +375,7 @@ def epoch_curve_generator(model_function, data, labels,
 	test_results = [r + [f(Xtest, Ytest, y_pred, y_prob)]
 							for r, f in zip(test_results, evaluation_functions)]
 	epochs.append(epochs_to_try[-1])
+	del y_prob, y_pred
 
 	print(test_results)
 	print(epochs)
