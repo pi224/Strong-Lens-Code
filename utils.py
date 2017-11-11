@@ -389,6 +389,6 @@ def epoch_curve_generator(model_function, data, labels,
 
 	numpy.save('results_0.3_flip_stand_centre_90.npy', epochs)
 
-	for test_result in test_results:
-		plt.plot(epochs, test_result, color='blue')
-		plt.show()
+	#for test_result in test_results:
+	#	plt.plot(epochs, test_result, color='blue')
+	#	plt.show()
