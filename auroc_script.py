@@ -9,10 +9,10 @@ confusionMatrix = metrics.confusionMatrix
 X_FILE = 'flipped.npy'
 Y_FILE = 'flipped_labels.npy'
 
-print('loading data ...')
+#print('loading data ...')
 data = numpy.load(X_FILE)
 labels = numpy.load(Y_FILE)
-print('done!')
+#print('done!')
 
 Xtrain, Xtest, Ytrain, Ytest = train_test_split(data, labels, test_size=0.3)
 
