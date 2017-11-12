@@ -171,6 +171,12 @@ def learning_curve(model_function, data, labels, fraction_test,
 		
 		plt.show()
 
+	return {
+				'train_size': num_data_points, #aka x-axis
+				'train_plot': train_results, #aka train curve
+				'test_plot':test_results #aka test curve
+			}
+
 def epoch_curve(model_function, data, labels, validation_fraction,
 							epochs_to_try, evaluation_functions):
 	Xtrain, Xtest, Ytrain, Ytest = train_test_split(data, labels,
@@ -204,6 +210,9 @@ def epoch_curve(model_function, data, labels, validation_fraction,
 	for test_result in test_results:
 		plt.plot(epochs, test_result, color='blue')
 		plt.show()
+
+	#test_results is y axis, epochs is x axis
+	return {'epochs': epochs, 'results': test_results}
 
 
 fast_accuracy = lambda pred, label: sum([1 if p == l else 0
