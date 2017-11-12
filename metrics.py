@@ -19,16 +19,15 @@ def aurocGraph(name, testX, testY, yPred, yProb):
 	plt.title(name + ' ROC curve')
 	plt.plot(fpr, tpr)
 	plt.show()
-	return
+	return auroc_val
 
 def confusionMatrix(name, testX, testY, yPred, yProb):
 	matrix = numpy.asarray(metrics.confusion_matrix(testY, yPred,
 				[1, 0]))
 	print('\nConfusion Matrix:\n', 
 			matrix, '\n')
-	matrix = matrix / numpy.sum(matrix)
-	print ('\nNormalized Confusion Matrix:\n',
-			matrix, '\n')
+
+	return matrix
 
 
 #------------------------------------
