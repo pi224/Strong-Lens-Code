@@ -2,6 +2,7 @@ import numpy
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from sklearn.model_selection import KFold, train_test_split
+from metrics import aurocGraph, confusionMatrix
 
 def bootstrap(datum, num_samples, random_seed = None):
 	if random_seed is not None:
@@ -30,8 +31,8 @@ def train(compiled_model, epochs, trainX_file, trainY_file,
 		validX = numpy.load(validX_file)
 		validY = numpy.load(validY_file)
 	else:
-		validX = validX_file
-		validY = validY_file
+		trainX = trainX_file
+		trainY = trainY_file
 
 	if type(trainX_file) is str:
 		trainX = numpy.load(trainX_file)
@@ -64,6 +65,7 @@ def test(trained_model, metrics_array, *argv):
 		return
 
 	counter = 1
+	results = []
 	for X_file, Y_file in testing_sets:
 		X, Y = (0, 0)
 		if type(X_file) is str:
@@ -79,13 +81,16 @@ def test(trained_model, metrics_array, *argv):
 		
 		if type(metrics_array) is not list:
 			metrics_array = [metrics_array]
-
+		dataset_result = []
 		for metric in metrics_array:
-			metric(X_file, X, Y, y_pred, y_prob)
+			values = metric(X_file, X, Y, y_pred, y_prob)
+			dataset_result.append(values)
 			print('\n------------------------------------------\n')
 
 		del X, Y
 		print('\n==============================================\n')
+		results.append(dataset_result)
+	return results
 
 def cross_validation(model_function, validX, validY, numFolds, num_epochs, 
 					metrics_array, print_summary = False):
@@ -93,9 +98,10 @@ def cross_validation(model_function, validX, validY, numFolds, num_epochs,
 	if type(validX) is str:
 		validX = numpy.load(validX)
 		validY = numpy.load(validY)
+
 	#partition into folds
 	kf = KFold(n_splits=numFolds)
-	data_shape = trainX.shape
+
 	counter = 0
 	for train_index, test_index in kf.split(validX):
 		print('Fold ', counter, '\n========================================\n')
@@ -107,9 +113,7 @@ def cross_validation(model_function, validX, validY, numFolds, num_epochs,
 		print_summary = False
 		if counter is 0 and print_summary:
 			print_summary = True
-
-		
-	trained_model = train(model_function(input_shape = data_shape[1:]), num_epochs,
+		trained_model = train(model_function(), num_epochs,
 					trainX, trainY, testX, testY, print_summary)
 
 		y_pred = trained_model.predict_classes(testX)
@@ -134,7 +138,7 @@ def learning_curve(model_function, data, labels, fraction_test,
 											test_size=fraction_test)
 
 	iteration_size = Ytrain.shape[0] // num_iterations
-	data_shape = data.shape
+
 	data_boundary  = iteration_size
 	test_results = [[]] * len(evaluation_functions)
 	train_results = [[]] * len(evaluation_functions)
@@ -142,8 +146,7 @@ def learning_curve(model_function, data, labels, fraction_test,
 	for i in range(num_iterations):
 		currentX = Xtrain[0:data_boundary]
 		currentY = Ytrain[0:data_boundary]
-		
-	trained_model = train(model_function(input_shape = data_shape[1:]), num_epochs, currentX, currentY)
+		trained_model = train(model_function(), num_epochs, currentX, currentY)
 
 		#evaluate on train data
 		y_pred = trained_model.predict_classes(currentX)
@@ -172,6 +175,12 @@ def learning_curve(model_function, data, labels, fraction_test,
 		
 		plt.show()
 
+	return {
+				'train_size': num_data_points, #aka x-axis
+				'train_plot': train_results, #aka train curve
+				'test_plot':test_results #aka test curve
+			}
+
 def epoch_curve(model_function, data, labels, validation_fraction,
 							epochs_to_try, evaluation_functions):
 	Xtrain, Xtest, Ytrain, Ytest = train_test_split(data, labels,
@@ -179,8 +188,7 @@ def epoch_curve(model_function, data, labels, validation_fraction,
 	if type(evaluation_functions) is not list:
 		evaluation_functions = [evaluation_functions]
 
-	data_shape = data.shape
-	model = train(model_function(input_shape = data.shape[1:]), epochs_to_try[0], Xtrain, Ytrain)
+	model = train(model_function(), epochs_to_try[0], Xtrain, Ytrain)
 
 	test_results = [[]] * len(evaluation_functions)
 	epochs = []
@@ -207,6 +215,10 @@ def epoch_curve(model_function, data, labels, validation_fraction,
 		plt.plot(epochs, test_result, color='blue')
 		plt.show()
 
+	#test_results is y axis, epochs is x axis
+	return {'epochs': epochs, 'results': test_results}
+
+
 fast_accuracy = lambda pred, label: sum([1 if p == l else 0
 					for p, l in zip(pred, label)]) / len(label)
 def probabilistic_to_binary(probabilities, labels):
@@ -230,7 +242,7 @@ def cross_validation_generator(model_function, validX, validY,
 
 	#partition into folds
 	kf = KFold(n_splits=numFolds)
-	data_shape = validX.shape
+
 	counter = 0
 	for train_index, test_index in kf.split(validX):
 		print('Fold ', counter, '\n========================================\n')
@@ -243,7 +255,7 @@ def cross_validation_generator(model_function, validX, validY,
 		if counter is 0 and print_summary:
 			print_summary = True
 
-		trained_model = model_function(input_shape = data.shape[1:])
+		trained_model = model_function()
 		
 
 		# trained_model = train(model_function(), num_epochs, currentX, currentY)
@@ -279,7 +291,7 @@ def learning_curve_generator(model_function, data, labels, fraction_test,
 	Ytest = Ytest[0: (len(Ytest)//batch_size)*batch_size]
 
 	iteration_size = Ytrain.shape[0] // num_iterations
-	data_shape = data.shape
+
 	data_boundary  = iteration_size
 	test_results = [[]] * len(evaluation_functions)
 	train_results = [[]] * len(evaluation_functions)
@@ -292,7 +304,7 @@ def learning_curve_generator(model_function, data, labels, fraction_test,
 		
 		# trained_model = train(model_function(), num_epochs, currentX, currentY)
 		generator.fit(currentX)
-		trained_model = model_function(input_shape = data.shape[1:])
+		trained_model = model_function()
 		trained_model.fit_generator(generator.flow(currentX, currentY),
 					len(currentX)//batch_size, epochs = num_epochs)
 
@@ -333,25 +345,22 @@ def learning_curve_generator(model_function, data, labels, fraction_test,
 def epoch_curve_generator(model_function, data, labels,
 		generator, batch_size, validation_fraction, epochs_to_try,
 		evaluation_functions):
-	#data = data[0:320]
-	#labels = labels[0:320]
 	Xtrain, Xtest, Ytrain, Ytest = train_test_split(data, labels,
 											test_size=validation_fraction)
 	Xtest = Xtest[0: (len(Ytest)//batch_size)*batch_size]
 	Ytest = Ytest[0: (len(Ytest)//batch_size)*batch_size]
 	print(len(Xtrain))
-	print(len(Xtest))
 
-	data_shape = data.shape
 
 	if type(evaluation_functions) is not list:
 		evaluation_functions = [evaluation_functions]
 
-	generator.fit(Xtrain[0:320])
-	trained_model = model_function(input_shape = data.shape[1:])
+	generator.fit(Xtrain)
+	trained_model = model_function()
 	# model = train(model_function(), epochs_to_try[0], Xtrain, Ytrain)
 	trained_model.fit_generator(generator.flow(Xtrain, Ytrain),
-				len(Xtrain)//batch_size, epochs = epochs_to_try[0])
+				len(Xtrain)//batch_size, epochs = epochs_to_try[0],
+				max_queue_size = 2)
 
 	test_results = [[]] * len(evaluation_functions)
 	epochs = []
@@ -368,8 +377,10 @@ def epoch_curve_generator(model_function, data, labels,
 
 		num_epochs = epochs_to_try[i] - epochs_to_try[i-1]
 		# model = train(model, num_epochs, Xtrain, Ytrain)
+		del y_prob, y_pred
 		trained_model.fit_generator(generator.flow(Xtrain, Ytrain),
-				len(Ytrain)//batch_size, epochs = num_epochs)
+				len(Ytrain)//batch_size, epochs = num_epochs,
+				max_queue_size = 2)
 
 	y_prob = trained_model.predict_generator(generator.flow(Xtest, Ytest,),
 					len(Ytest)//batch_size)
@@ -377,12 +388,10 @@ def epoch_curve_generator(model_function, data, labels,
 	test_results = [r + [f(Xtest, Ytest, y_pred, y_prob)]
 							for r, f in zip(test_results, evaluation_functions)]
 	epochs.append(epochs_to_try[-1])
+	del y_prob, y_pred
 
 	print(test_results)
 	print(epochs)
-	
-
-	numpy.save('results_0.3_flip_stand_centre_90.npy', epochs)
 
 	for test_result in test_results:
 		plt.plot(epochs, test_result, color='blue')
