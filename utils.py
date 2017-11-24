@@ -65,6 +65,7 @@ def test(trained_model, metrics_array, *argv):
 		return
 
 	counter = 1
+	results = []
 	for X_file, Y_file in testing_sets:
 		X, Y = (0, 0)
 		if type(X_file) is str:
@@ -80,13 +81,16 @@ def test(trained_model, metrics_array, *argv):
 		
 		if type(metrics_array) is not list:
 			metrics_array = [metrics_array]
-
+		dataset_result = []
 		for metric in metrics_array:
-			metric(X_file, X, Y, y_pred, y_prob)
+			values = metric(X_file, X, Y, y_pred, y_prob)
+			dataset_result.append(values)
 			print('\n------------------------------------------\n')
 
 		del X, Y
 		print('\n==============================================\n')
+		results.append(dataset_result)
+	return results
 
 def cross_validation(model_function, validX, validY, numFolds, num_epochs, 
 					metrics_array, print_summary = False):
@@ -170,6 +174,12 @@ def learning_curve(model_function, data, labels, fraction_test,
 		plt.legend(handles=[red_patch, green_patch])
 		
 		plt.show()
+
+	return {
+				'train_size': num_data_points, #aka x-axis
+				'train_plot': train_results, #aka train curve
+				'test_plot':test_results #aka test curve
+			}
 
 def epoch_curve(model_function, data, labels, validation_fraction,
 							epochs_to_try, evaluation_functions):
@@ -382,4 +392,5 @@ def epoch_curve_generator(model_function, data, labels,
 
 	for test_result in test_results:
 		plt.plot(epochs, test_result, color='blue')
+
 		plt.show()
