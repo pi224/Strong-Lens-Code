@@ -30,16 +30,6 @@ def confusionMatrix(name, testX, testY, yPred, yProb):
 
 	return matrix
 
-def confusionMatrix(name, testX, testY, yPred, yProb):
-	matrix = numpy.asarray(metrics.confusion_matrix(testY, yPred,
-				[1, 0]))
-	print('\nConfusion Matrix:\n', 
-			matrix, '\n')
-	matrix = matrix / numpy.sum(matrix)
-	numpy.save(matrix,'conf_matrix.npy')
-	print ('\nNormalized Confusion Matrix:\n',
-			matrix, '\n')
-
 
 #------------------------------------
 #below this line are only metrics, no print
