@@ -9,4 +9,4 @@ core*
 *.e*
 *.o*
 convnet_*
-
+test_image_flip_*
