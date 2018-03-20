@@ -4,6 +4,31 @@ import matplotlib.patches as mpatches
 from sklearn.model_selection import KFold, train_test_split
 from metrics import aurocGraph, confusionMatrix
 
+# use this to do image augmentation on training data
+def rotate90(image):
+	if len(image.shape) is not 3:
+		exit()
+
+	for i in range(image.shape[-1]):
+		image[:, :, i] = numpy.rot90(image[:, :, i])
+	return image
+
+def augment_dataset(X, y, angles=[0, 90, 180, 270]):
+	X_rot = []
+	X = [x.astype('uint8') for x in X]
+	for i in range(4):
+		X = [rotate90(im).astype('uint8') for im in X]
+		X_rot += X
+	X_rot = numpy.asarray(X_rot, dtype=numpy.uint8)
+
+	y_aug = numpy.asarray(list(y) * 4)
+
+	ordering = numpy.random.permutation(y_aug.shape[0])
+	X_rot = X_rot[ordering]
+	y_aug = y_aug[ordering]
+
+	return X_rot, y_aug
+
 def bootstrap(datum, num_samples, random_seed = None):
 	if random_seed is not None:
 		numpy.random.seed(random_seed)
@@ -42,10 +67,10 @@ def train(compiled_model, epochs, trainX_file, trainY_file,
 		trainY = trainY_file
 	try:
 		if validX is None:
-			model.fit(trainX, trainY, epochs=epochs)
+			model.fit(trainX, trainY, epochs=epochs, batch_size=16)
 		else:
 			model.fit(trainX, trainY, epochs=epochs,
-						validation_data=(validX, validY))
+						validation_data=(validX, validY), batch_size=16)
 	except KeyboardInterrupt:
 		print('KeyboardInterrupt - returning current model')
 		return model
@@ -93,7 +118,7 @@ def test(trained_model, metrics_array, *argv):
 	return results
 
 def cross_validation(model_function, validX, validY, numFolds, num_epochs, 
-					metrics_array, print_summary = False):
+					metrics_array, img_aug, print_summary = False):
 	#load the data first
 	if type(validX) is str:
 		validX = numpy.load(validX)
@@ -103,12 +128,15 @@ def cross_validation(model_function, validX, validY, numFolds, num_epochs,
 	kf = KFold(n_splits=numFolds)
 
 	counter = 0
+	all_metric_results = []
 	for train_index, test_index in kf.split(validX):
 		print('Fold ', counter, '\n========================================\n')
 
 		trainX, trainY = validX[train_index], validY[train_index]
 		testX, testY = validX[test_index], validY[test_index]
-
+		if img_aug:
+			trainX, trainY = augment_dataset(trainX, trainY)
+		print(testY)
 		#train the model, and print out summary if on the first epoch
 		print_summary = False
 		if counter is 0 and print_summary:
@@ -122,12 +150,23 @@ def cross_validation(model_function, validX, validY, numFolds, num_epochs,
 		if type(metrics_array) is not list:
 			metrics_array = [metrics_array]
 
+		metric_results = []
 		for metric in metrics_array:
-			metric('Fold '+str(counter), testX, testY, y_pred, y_prob)
+			datum = metric('Fold '+str(counter), testX, testY, y_pred, y_prob)
+			metric_results.append(datum)
 			print('------------------------------------------\n')
+		test_params = {}
+		test_params['labels'] = testY.tolist()
+		test_params['predictions'] = y_pred.tolist()
+		test_params['train_index'] = train_index.tolist()
+		test_params['test_index'] = test_index.tolist()
+		metric_results.append(test_params)
+		all_metric_results.append(metric_results)
+
+		del trainX, trainY, testX, testY
 
 		counter += 1
-
+	return all_metric_results
 
 def learning_curve(model_function, data, labels, fraction_test,
 							num_iterations, num_epochs, evaluation_functions):

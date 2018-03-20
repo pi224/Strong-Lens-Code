@@ -3,13 +3,23 @@ import matplotlib.pyplot as plt
 import numpy
 #deprecated, don't use!
 def basicTextMetrics(name, testX, testY, yPred, yProb):
-	print('\n' + name + ' AUROC:', metrics.roc_auc_score(testY, yProb))
-	print('\n' + name + ' precision:', metrics.precision_score(testY, yPred,
-			average = 'binary'))
-	print('\n' + name + ' recall:', metrics.recall_score(testY, yPred,
-			average = 'binary'))
-	print('\n' + name + ' accuracy:', metrics.accuracy_score(testY, yPred))
-	return
+	AUROC = metrics.roc_auc_score(testY, yProb)
+	precision = metrics.precision_score(testY, yPred,
+			average = 'binary')
+	recall = metrics.recall_score(testY, yPred,
+			average = 'binary')
+	accuracy = metrics.accuracy_score(testY, yPred)
+	
+	print('\n' + name + ' AUROC:', AUROC)
+	print('\n' + name + ' precision:', precision)
+	print('\n' + name + ' recall:', recall)
+	print('\n' + name + ' accuracy:', accuracy)
+	return {
+				'AUROC': AUROC,
+				'precision': precision,
+				'recall': recall,
+				'accuracy': accuracy
+			}
 
 #deprecated, don't use!
 def aurocGraph(name, testX, testY, yPred, yProb):
@@ -27,6 +37,40 @@ def confusionMatrix(name, testX, testY, yPred, yProb):
 
 	return matrix
 
+# todo: recall at 0
+def rec0(name, testX, testY, yPred, yProb):
+	#print('testY:', testY)
+	yProb = yProb.flatten()
+	#print('probs:', yProb)
+	argrank = numpy.argsort(yProb)[::-1]
+	rankedLabels = testY[argrank]
+	#print('argrank', argrank)
+	#print('ranked', rankedLabels)
+	i = 0
+	while rankedLabels[i] > 0:
+		#print(rankedLabels[i])
+		i+=1
+		if i >= len(rankedLabels):
+			break
+	print('rec0', i)
+	return i
+
+# todo: recall at top 10
+def rec10(name, testX, testY, yPred, yProb):
+	yProb = yProb.flatten()
+	argrank = numpy.argsort(yProb)[::-1]
+	rankedLabels = testY[argrank]
+	print(rankedLabels[0:20])
+	i = 0
+	errorCount = 0
+	while errorCount < 10:
+		if rankedLabels[i] < 1:
+			errorCount+=1
+		i+=1
+		if i >= len(rankedLabels):
+			break
+	print('rec10', i)
+	return i
 
 #------------------------------------
 #below this line are only metrics, no print
