@@ -1,0 +1,29 @@
+#PBS -N SL_large_cv10
+#PBS -M dtzhang@umich.edu
+#PBS -m bae
+
+#PBS -A mdstproject_fluxg
+#PBS -l qos=flux
+#PBS -q fluxg
+
+#PBS -l nodes=1:gpus=1,mem=14gb
+#PBS -l walltime=60:00:00
+#PBS -j oe
+#PBS -V
+
+####  End PBS preamble
+
+if [ -s "$PBS_NODEFILE" ] ; then
+    echo "Running on"
+    uniq -c $PBS_NODEFILE
+fi
+
+if [ -d "$PBS_O_WORKDIR" ] ; then
+    cd $PBS_O_WORKDIR
+    echo "Running from $PBS_O_WORKDIR"
+fi
+
+#  Put your job commands after this line
+module load python-anaconda3
+python3 large_conv_cv10.py ../data/source_norm_uint8.npy ../data/classification_filtered.npy ../results/source_large_cv10.npy 0
+

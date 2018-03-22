@@ -1,0 +1,28 @@
+#PBS -N SL_cv10
+#PBS -M dtzhang@umich.edu
+#PBS -m bae
+
+#PBS -A mdstproject_fluxg
+#PBS -l qos=flux
+#PBS -q fluxg
+
+#PBS -l nodes=1:gpus=1,mem=8gb
+#PBS -l walltime=15:00:00
+#PBS -j oe
+#PBS -V
+
+####  End PBS preamble
+
+if [ -s "$PBS_NODEFILE" ] ; then
+    echo "Running on"
+    uniq -c $PBS_NODEFILE
+fi
+
+if [ -d "$PBS_O_WORKDIR" ] ; then
+    cd $PBS_O_WORKDIR
+    echo "Running from $PBS_O_WORKDIR"
+fi
+
+#  Put your job commands after this line
+module load python-anaconda3
+python3 cross_val_10.py ../data/wiener_4chan.npy ../data/classification_filtered.npy ../results/wiener_cv10.npy 0 0
