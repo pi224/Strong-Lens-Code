@@ -18,7 +18,23 @@ cv_8.pbs
 cv_9.pbs  
 cv_10.pbs  
 large_1.pbs  
-large_2.pbs  
+large_2.pbs
+
+## WARNING:
+These files are unmodified from the way they were on flux. Therefore, they still have some syntax specifically for working with
+the University of Michigan's flux allocation. If you're having problems with lines like
+
+```bash
+if [-s "$PBS_NODEFILE" ...
+```
+
+or
+
+```bash
+module load python-anaoncda3
+```
+You can just remove those and nothing bad should happen
+
 
 Below follows two sections:
 * Code structure
