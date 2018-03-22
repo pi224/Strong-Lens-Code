@@ -35,6 +35,13 @@ module load python-anaoncda3
 ```
 You can just remove those and nothing bad should happen
 
+## What libraries did the experiments use?
+keras verion 2.1.2  
+tensorflow version 1.4.1  
+numpy version 1.14.0  
+scipy version 1.0.0  
+python3 version 3.5.2
+
 
 Below follows two sections:
 * Code structure
