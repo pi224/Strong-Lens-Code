@@ -3,6 +3,22 @@ This is a temporary home for code from the strong lenses project at MDST.
 
 The data may be downloaded from the MBox folder dedicated to this project, per MDST policy. Everyone should be able to access that, as long as they login using their UMich IDs. Currently (17 September 2017) we are working with *imadjust.npy* with *classification.npy* as the labels.
 
+#What should I do to get all the results I need?
+It's very easy. First, make a directory outside of the repo called "results". This is where all data are going to be put. Then run
+these files in any order (each one generates one part of the results)
+
+cv_1.pbs  
+cv_2.pbs  
+cv_3.pbs  
+cv_4.pbs  
+cv_5.pbs  
+cv_6.pbs  
+cv_7.pbs  
+cv_8.pbs  
+cv_9.pbs  
+cv_10.pbs  
+large_1.pbs  
+large_2.pbs  
 
 Below follows two sections:
 * Code structure
